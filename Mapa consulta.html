@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8 />
+	<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui' />
+	<title>Leaflet Parcelas :: Leaflet Capa GeoJSON archivo js</title>
+	<script src='http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet-src.js'></script>
+	<link href='http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css' rel='stylesheet' />
+	<script type="text/javascript" src="parcelas.js"></script>
+<style>
+  #map { 
+  widh: 50px;
+  height: 1200px; }
+ </style>
+</head>
+
+<body>
+	<div id='map'></div>
+<script>
+	//Insertar aquí
+var map = L.map('map').setView([40.404,-3.678], 16); // Barrio de Pacífico
+var osmLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap<\/a> contributors'
+}).addTo(map);
+
+L.control.scale().addTo(map);
+
+// AñadimosFunción de color de acuerdo al Año de construcción
+	function getColor(d) {
+	return d > 2009 ? '#800026' : 
+	d > 1992 ? '#BD0026' : 
+	d > 1976 ? '#E31A1C' : 
+	d > 1961 ? '#FC4E2A' : 
+	d > 1943 ? '#FD8D3C' :
+	d > 1920 ? '#FEB24C' : 
+	d > 1 ? '#FED976' : 
+	'#FFFFFF'; 
+	}
+
+//'#FFEDA0' Este es el color que figuraba en último lugar y que he sustituido por el blanco '#FFFFFF'
+
+//A continuación definimos otra función para nuestra capa GeoJSON de manera que fillColor dependerá de la propiedad feature.properties.AnnoIni.
+//Ajustamos la apariencia y añadimos un borde blanco con puntos discontinuos. 
+	function style(feature) { 
+	return { 
+	fillColor: getColor(
+	feature.properties.AnnoIni), 
+	weight: 2, 
+	opacity: 1, 
+	color: 'green', 
+	dashArray: '3', 
+	fillOpacity: 0.7 
+	}; 
+	}
+
+//añadimos el mapa de parcelas
+ L.geoJson(parcelas, {style: style}).addTo(map);
+
+// Interactuando con el mapa
+// Utilizamos la funcionalidad popup de Leafnet para que al hacer click nos proporcione los datos que deseamos
+function popup(feature, layer) { 
+if (feature.properties && feature.properties.REFCAT) 
+{ 
+layer.bindPopup("<b>"+feature.properties.REFCAT+"</b><br>"+feature.properties.AnnoIni);
+} 
+}
+
+//Por último añadimos la función que crea las ventanas emergentes
+geojson = L.geoJson(parcelas, { 
+ style: style, onEachFeature: popup 
+}) 
+.addTo(map);
+</script>
+
+</body>
+</html>
